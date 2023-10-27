@@ -31,11 +31,12 @@ Sub TransferDataToSQLWithNulls()
         entityId = ThisWorkbook.Sheets("Public").Cells(i, "G").Value
         vlookupDB = ThisWorkbook.Sheets("Public").Cells(i, "H").Value
         Research = ThisWorkbook.Sheets("Public").Cells(i, "J").Value
+        Position = ThisWorkbook.Sheets("Public").Cells(i, "I").Value
         
         If rankValue = "" Then
-            strSQL = "INSERT INTO dbo.publicEquitiesTest (Rank, HolderID, FundCode, InstCode, EntityID, clientCode, research) VALUES (NULL, '" & holderVal & "', '" & fundCode & "', '" & instCode & "', '" & entityId & "', '" & clientValue & "', '" & Research & "')"
+            strSQL = "INSERT INTO dbo.publicEquitiesTest (Rank, HolderID, FundCode, InstCode, EntityID, clientCode, research, position) VALUES (NULL, '" & holderVal & "', '" & fundCode & "', '" & instCode & "', '" & entityId & "', '" & clientValue & "', '" & Research & "', '" & Position & "')"
         Else
-            strSQL = "INSERT INTO dbo.publicEquitiesTest (Rank, HolderID, FundCode, InstCode, EntityID, clientCode, research) VALUES (" & rankValue & ", '" & holderVal & "', '" & fundCode & "', '" & instCode & "', '" & entityId & "', '" & clientValue & "', '" & Research & "')"
+            strSQL = "INSERT INTO dbo.publicEquitiesTest (Rank, HolderID, FundCode, InstCode, EntityID, clientCode, research, position) VALUES (" & rankValue & ", '" & holderVal & "', '" & fundCode & "', '" & instCode & "', '" & entityId & "', '" & clientValue & "', '" & Research & "', '" & Position & "')"
         End If
     
         conn.Execute strSQL
