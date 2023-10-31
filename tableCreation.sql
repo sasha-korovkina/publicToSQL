@@ -91,6 +91,11 @@ BEGIN
 
     EXEC dbo.createColumns;
     EXEC dbo.updateColumns;
+	SELECT c.*
+	FROM publicEquitiesRawCopy AS c
+	LEFT JOIN [CDB].[map].[code] AS co
+	ON c.entityID COLLATE Latin1_General_CI_AS = co.code COLLATE Latin1_General_CI_AS
+	WHERE co.code IS NULL;
 END;
 
 exec publicToSQL
