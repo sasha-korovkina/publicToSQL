@@ -1,16 +1,23 @@
 -- Initial table (formed from the VBA) is publicEquities 
 -- Create a stored procedure to add multiple columns to the publicEquitiesTest table
-
+CREATE TABLE publicEquitiesRaw (
+    rank INT,
+    holderid VARCHAR(255),
+    instcode VARCHAR(255),
+    fundcode VARCHAR(255),
+	clientcode VARCHAR(255),
+	note VARCHAR(255),
+    entityid VARCHAR(255),
+    vlookupdb VARCHAR(255),
+    research VARCHAR(255),
+    position INT
+);
 
 alter PROCEDURE dbo.createColumns
 AS
 BEGIN
-	
     ALTER TABLE publicEquitiesRawCopy
     ADD [isin] VARCHAR(255);
-
-    ALTER TABLE publicEquitiesRawCopy
-    ADD [note] VARCHAR(255);
 
     ALTER TABLE publicEquitiesRawCopy
     ADD [non_disclosed] INT;
@@ -58,12 +65,12 @@ AS
 	ALTER TABLE publicEquitiesRawCopy
 	DROP COLUMN clientCode;
 	
-	UPDATE t
+	/*UPDATE t
 	SET t.note = d.note
 	FROM publicEquitiesRawCopy AS t
 	JOIN [CDB].[ent].[entity] AS e
 	ON t.EntityID COLLATE Latin1_General_CI_AS = e.cmi2i_code COLLATE Latin1_General_CI_AS
-	JOIN [CDB].[own].[disclosed] d ON e.ent_id = d.fund_ent_id
+	JOIN [CDB].[own].[disclosed] d ON e.ent_id = d.fund_ent_id*/
 
 	UPDATE publicEquitiesRawCopy
 	SET project_code = (
@@ -88,8 +95,20 @@ BEGIN
 	SELECT *
 	INTO publicEquitiesRawCopy
 	FROM publicEquitiesRaw;
+	EXEC dbo.createColumns;
 
-    EXEC dbo.createColumns;
+	-- Update the new column by converting the string
+	UPDATE [publicEquitiesRawCopy]
+	SET researchDate = CONVERT(DATETIME, research, 105); -- 105 is the format code for 'dd/mm/yyyy'
+
+	-- Convert the newDateColumn to the 'yyyy-mm-dd' format
+	UPDATE [publicEquitiesRawCopy]
+	SET researchDate = CONVERT(NVARCHAR(10), researchDate, 23); -- 23 is the format code for 'yyyy-mm-dd'
+
+	-- Drop the 'research' column
+	ALTER TABLE [publicEquitiesRawCopy]
+	DROP COLUMN research;
+
     EXEC dbo.updateColumns;
 	SELECT c.*
 	FROM publicEquitiesRawCopy AS c
