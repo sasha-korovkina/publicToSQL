@@ -126,8 +126,10 @@ select *
 from publicEquitiesRawCopy
 
 select 
-	case when e.database_key = 'I' then e.ent_id else null end as advisor_ent_id
-	, case when e.database_key = 'F' then e.ent_id else null end as fund_ent_id
+	--case when e.database_key = 'I' then e.ent_id else null end as advisor_ent_id
+	--, case when e.database_key = 'F' then e.ent_id else null end as fund_ent_id
+	e.ent_id as advisor_ent_id
+	, e1.ent_id as fund_ent_id
 	, client_code
 	, project_code
 	, listing_key 
@@ -141,13 +143,19 @@ select
 	, [non_disclosed]
 	, isin
 	, c.[mapped_user]
-	, [mapped_datetime]
+	, holding_date as [mapped_datetime]
+-- FROM publicEquitiesRawCopy c
+-- LEFT JOIN [CDB].[map].[code] AS co
+-- ON c.entityID COLLATE Latin1_General_CI_AS = co.code
 FROM publicEquitiesRawCopy c
-LEFT JOIN [CDB].[map].[code] AS co
-ON c.entityID COLLATE Latin1_General_CI_AS = co.code 
+-- LEFT JOIN [CDB].[map].[code] AS co
+-- ON c.entityID COLLATE Latin1_General_CI_AS = co.code
 LEFT JOIN [CDB].ent.entity AS e
-ON e.ent_id = co.ent_id 
-where created_user = 'factset'
+ON e.cmi2i_code COLLATE DATABASE_DEFAULT = c.instcode COLLATE DATABASE_DEFAULT
+LEFT JOIN [CDB].ent.entity AS e1
+ON e1.cmi2i_code COLLATE DATABASE_DEFAULT = c.entityid COLLATE DATABASE_DEFAULT
+
+
 
 CREATE PROCEDURE InsertIntoDisclosedTable
 AS
@@ -170,27 +178,35 @@ BEGIN
         [mapped_user],
         [mapped_datetime]
     )
-    SELECT 
-        CASE WHEN e.database_key = 'I' THEN e.ent_id ELSE NULL END AS advisor_ent_id,
-        CASE WHEN e.database_key = 'F' THEN e.ent_id ELSE NULL END AS fund_ent_id,
-        client_code,
-        project_code,
-        listing_key,
-        [disclosure_source_key],
-        [vlref],
-        [holding_date],
-        [position],
-        [grey_area],
-        [researchDate] as research,
-        [note],
-        [non_disclosed],
-        isin,
-        c.[mapped_user],
-        [mapped_datetime]
-    FROM publicEquitiesRawCopy c
-    LEFT JOIN [CDB].[map].[code] AS co ON c.entityID COLLATE Latin1_General_CI_AS = co.code
-    LEFT JOIN [CDB].ent.entity AS e ON e.ent_id = co.ent_id
-    WHERE created_user = 'factset';
+    select 
+	--case when e.database_key = 'I' then e.ent_id else null end as advisor_ent_id
+	--, case when e.database_key = 'F' then e.ent_id else null end as fund_ent_id
+	e.ent_id as advisor_ent_id
+	, e1.ent_id as fund_ent_id
+	, client_code
+	, project_code
+	, listing_key 
+	, [disclosure_source_key]
+	, [vlref]
+	, [holding_date]
+	, [position]
+	, [grey_area]
+	, [researchDate] as research
+	, [note]
+	, [non_disclosed]
+	, isin
+	, c.[mapped_user]
+	, holding_date as [mapped_datetime]
+	-- FROM publicEquitiesRawCopy c
+	-- LEFT JOIN [CDB].[map].[code] AS co
+	-- ON c.entityID COLLATE Latin1_General_CI_AS = co.code
+	FROM publicEquitiesRawCopy c
+	-- LEFT JOIN [CDB].[map].[code] AS co
+	-- ON c.entityID COLLATE Latin1_General_CI_AS = co.code
+	LEFT JOIN [CDB].ent.entity AS e
+	ON e.cmi2i_code COLLATE DATABASE_DEFAULT = c.instcode COLLATE DATABASE_DEFAULT
+	LEFT JOIN [CDB].ent.entity AS e1
+	ON e1.cmi2i_code COLLATE DATABASE_DEFAULT = c.entityid COLLATE DATABASE_DEFAULT
 END;
 
 
